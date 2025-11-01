@@ -60,16 +60,8 @@ const getRemainingDays = (expiryTimestamp) => {
 // Format phone number - remove 91 prefix
 const formatPhoneNumber = (phoneNumber) => {
   if (!phoneNumber) return 'N/A';
-  
-  // Remove any non-digit characters
-  const cleaned = phoneNumber.toString().replace(/\D/g, '');
-  
-  // Remove 91 prefix if present
-  if (cleaned.startsWith('91') && cleaned.length > 10) {
-    return cleaned.substring(2);
-  }
-  
-  return cleaned;
+  const phoneStr = phoneNumber.toString();
+  return phoneStr.startsWith('91') ? phoneStr.substring(2) : phoneStr;
 };
 
 // Styled Components
@@ -445,22 +437,25 @@ const UsersList = () => {
 }, []);
 
   // Filter users based on search term and active filter
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.phone_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.referrer?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-   const now = Date.now();
-const matchesFilter = 
-  activeFilter === 'all' ? true :
-  activeFilter === 'active' ? (user.expiry_date && parseInt(user.expiry_date) >= now) :
-  activeFilter === 'expired' ? (user.expiry_date && parseInt(user.expiry_date) < now) :
-  true;
-
-    
-    return matchesSearch && matchesFilter;
-  });
+const filteredUsers = users.filter(user => {
+  const phoneNumber = user.phone_number ? user.phone_number.toString() : '';
+  const userName = user.user_name ? user.user_name.toLowerCase() : '';
+  const referrer = user.referrer ? user.referrer.toLowerCase() : '';
+  
+  const matchesSearch = 
+    phoneNumber.includes(searchTerm.toLowerCase()) ||
+    userName.includes(searchTerm.toLowerCase()) ||
+    referrer.includes(searchTerm.toLowerCase());
+  
+  const now = Date.now();
+  const matchesFilter = 
+    activeFilter === 'all' ? true :
+    activeFilter === 'active' ? (user.expiry_date && parseInt(user.expiry_date) >= now) :
+    activeFilter === 'expired' ? (user.expiry_date && parseInt(user.expiry_date) < now) :
+    true;
+  
+  return matchesSearch && matchesFilter;
+});
 
 // Calculate stats properly
 const now = Date.now();
